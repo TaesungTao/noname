@@ -1,0 +1,69 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
+
+public class EnemyPatrol : MonoBehaviour
+{
+    public Transform[] waypoints; //waypoints that the enemy patrols between
+    public int speed;
+    public Transform Player; // this is the "player" or basically who we will be controlling
+    public Transform Enemy; // this is the enemy, in our game it will be an alien I presume
+    Animator anim; // for animation
+    public LayerMask whatIsPlayer; // checks a layer to see if it is the layer the player is on. I can go more in depth on this if you're confused
+    public float sightRange; // checks what the enemy can actually see
+    public bool enemySeesPlayer; // bool to check if the enemy can see the player 
+    private int waypointIndex; // number of waypoints
+    private float dist; 
+    public float offset; // this is the offset between the enemy and player 
+    
+    // Start is called before the first frame update
+    void Start()
+    {
+        offset = Vector3.Distance(Enemy.position, Player.position); //checks offset between characters
+        waypointIndex = 0;
+        transform.LookAt(waypoints[waypointIndex].position);
+        InvokeRepeating("Spawn", 1.0f, 1.0f);
+        
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        enemySeesPlayer = Physics.CheckSphere(Enemy.transform.position, sightRange, whatIsPlayer);
+        if (!enemySeesPlayer) Patrol();
+        if (enemySeesPlayer) Chase();
+        dist = Vector3.Distance(transform.position, waypoints[waypointIndex].position);
+        if(dist < 1f)
+        {
+            IncreaseIndex();
+        }
+    }
+
+    void Patrol()
+    {
+        transform.Translate(Vector3.forward * speed * Time.deltaTime);
+    }
+
+    void Chase()
+    {
+            
+        transform.LookAt(Player);
+        transform.Translate(Vector3.forward * speed * Time.deltaTime);
+
+    
+    }
+
+    void IncreaseIndex()
+    {
+        waypointIndex++;
+        if(waypointIndex >= waypoints.Length)
+        {
+            waypointIndex = 0;
+        
+        }
+        transform.LookAt(waypoints[waypointIndex].position);
+    
+}
+}
+
